@@ -13,9 +13,11 @@ The tasks were:
 5.	Creates a second, independent tidy data set with the average of each variable for each activity and each subject. 
 
 
-The link to the R script is
+The link to the tidy data set R script output as text is 
+https://github.com/helcia/datasciencecoursera/blob/master/tidydataset.txt
 
-The link to the code book that describes the variables, the data and the transformations conducted in the R script is
+The link to the code book that describes the variables, the data and the transformations conducted in the R script is https://github.com/helcia/datasciencecoursera/blob/master/Codebook.docx
+Click the "raw" link to open the Word document.
 
 The link to the “untidy” project dataset is https://d396qusza40orc.cloudfront.net/getdata%2Fprojectfiles%2FUCI%20HAR%20Dataset.zip
 
