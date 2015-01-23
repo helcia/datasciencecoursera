@@ -92,19 +92,48 @@ print(M3)
 
 Compare the Models
 
-When comparing the predictions with the class, it is clear that the random forest method best predicts the class with an accurace of 100% and a 95% confidence interval of 0.999 to 1.  Such results indicate the possibility of overfitting and caution should be employed.  See the model 1 prediction table.
+Compare the Models
+When comparing the predictions with the class, it is clear that the random forest method best predicts the class with an accuracy of 100% and a 95% confidence interval of 0.999 to 1.  Such results indicate the possibility of overfitting, and caution should be employed.  See the model 1 prediction table.
+
 ```{r}
 print(M1)
 ```
-Model 3, knn, predicts the class with an accuracy of 92.1% and a 95% confidence interval of 0.911 to 0.923.  This model could be used as a prediction model for this dataset, but fails to predict as well as the random forest method.  For example, Class A was misclassified 39 times. See the model 3 table.  
-```{r}
-print(M3)
-```
+                 Model 1 - Random Forest
+                 Reference
+Prediction    A      B       C      D    E
+         A   1343    0       0      0    0
+         B    0     907      0      0    0
+         C    0      0      831     0    0
+         D    0      0       0     760   0
+         E    0      0       0     0    872
 
-Model 2, rpart, demonstrated the least accuract in predicting class with an accurace of 50.1% with a 95% confidence interval of 0.454 to 0.517.  The partitioning placed most of the actions in classes A, B and C and only one in class E and none in class D.  See the model 2 table.
+Model 3, knn, predicts the class with an accuracy of 94.7% and a 95% confidence interval of 0.940 to 0.953.  The expected out of sample error for this model would be 7.9% and could be used as a prediction model for this dataset, but fails to predict as well as the random forest method.  For example, Class A was misclassified 39 times. See the model 3 table.    
 ```{r}
 print(M3)
 ```
+                Model 3 - KNN        
+                Reference
+Prediction    A      B       C      D    E
+         A   1315    24      9      6    9
+         B     4    839     16      4   19
+         C     9     19    790     36   15
+         D    13     18     10    711   20
+         E     2      7      6      3  809
+
+Model 2, rpart, demonstrated the least accurate in predicting class with an accurace of 50.1% with a 95% confidence interval of 0.454 to 0.517.  The expected out of sample error is 49.9%, that is, about essentially the accuracy of a coin flip. The partitioning placed most of the actions in classes A, B and C and only one in class E and none in class D.  See the model 2 table.
+```{r}
+print(M3)
+```
+                    Model 2 - rpart
+                      Reference
+Prediction    A      B     C       D      E
+         A   1221   386   373     345    120
+         B     19   240    12     139     42
+         C     94   281   446     276    294
+         D      0     0     0       0      0
+         E      9     0     0       0    416
+
+
 
 Given these results, the random forest method was applied to the graded test set for this project.
 
@@ -120,4 +149,4 @@ pml_write_files = function(x){
 
 pml_write_files(forgrade)
 ```
-
+When these results were evaluated within the course, the answers were in 100% agreement with the correct answers.  
