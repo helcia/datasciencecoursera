@@ -1,0 +1,123 @@
+---
+title: "Machine Learning Course Project rmd"
+output: html_document
+---
+Background
+
+The purpose of this course project is to use data from accelerometers on the belt, forearm, arm, and dumbell of 6 participants. They were asked to perform barbell lifts correctly and incorrectly in 5 different ways. More information is available from the website here: http://groupware.les.inf.puc-rio.br/har (see the section on the Weight Lifting Exercise Dataset). 
+
+The participants performed the actions in the following ways:
+Class A - performance exactly according to the specification
+Class B - throwing the elbows to the front
+Class C - lifting the dumbbell only halfway
+Class D - lowering the dumbbell only halfway
+Class E - throwing the hips to the front
+
+Comparison among three models were perfomed to determine which best predicted the class of performance of these exercises given a training set of variables.  The models were random forest (model 1), rpart( model 2), and knn - k-nearest neighbour classification (model 3).  
+
+Data Acquisition and Cleaning
+
+The training and test data for this project were downloaded. The data for this project come from this source: http://groupware.les.inf.puc-rio.br/har. 
+
+```{r}
+library(caret)
+library(rpart)
+library(rpart.plot)
+library(knitr)
+library(randomForest)
+library(rattle)
+
+trainURL<-"https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv"
+gradeURL<-"https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv"
+training<-read.csv(url(trainURL), header=TRUE, as.is = TRUE, stringsAsFactors=FALSE, sep=',', na.strings=c('NA', '#DIV/0!', ''))
+```
+View the structure and clean the data.
+
+The first 7 columns which did not contribute to the model and several variables containing NA's were removed. The same procedures were applied to the project test set which was renamed "grade" to preserve integrity until final model application. Near zero variance was used to check for remaining predictors that contained a single value.  The training set was reduced to 52 variables.
+```{r}
+str(training[,100:160]) 
+training$classe<-as.factor(training$classe)
+trainingall<-training
+cleanNA<-apply(trainingall,2,function(x) {sum(is.na(x))})
+training2<-trainingall[,which(cleanNA==0)]
+training<-training2[,8:60]
+grade<-read.csv(url(gradeURL), header=TRUE, as.is = TRUE, stringsAsFactors=FALSE, sep=',', na.strings=c('NA', '#DIV/0!', ''))
+gradeall<-grade
+grade2<-gradeall[,which(cleanNA==0)]
+grade<-grade2[,8:60]
+trainnzv<-nearZeroVar(training, saveMetrics=TRUE)
+print(training)
+```
+Partition the Training Set
+The training set was partitioned into a training and testing subset.
+```{r}
+set.seed(999)
+inTrain<- createDataPartition(y=training$classe, p=.6, list=FALSE)
+training<-training[inTrain,]
+testing<-training[-inTrain,]
+trainvars<-names(training)
+```
+
+Create the Models
+Include cross validation in each of the models and compare the predictions among the models. 
+Model 1 - Random Forest
+```{r}
+validationgroup<-trainControl(method="cv", number = 5, allowParallel = TRUE, verboseIter =TRUE)
+model1<-train(classe~., data=training, method="rf", trControl=validationgroup)
+model1
+predictionrf<-predict(model1,testing)
+testing$predrfright<-predictionrf=testing$classe
+table(predictionrf,testing$classe)
+M1<-confusionMatrix(predictionrf, testing$classe)
+````
+
+Model 2 - rpart
+
+```{r}
+model2<-train(classe~., data=training, method="rpart", trControl=validationgroup)
+predictrpart<-predict(model2, testing)
+table(predictrpart,testing$classe)
+M2<-confusionMatrix(predictrpart, testing$classe)
+print(M2)
+```
+
+Model 3 -knn  Nearest Neighbour Classification
+```{r}
+model3<-train(classe~., data=training, method="knn", trControl=validationgroup)
+predictknn<-predict(model3, testing)
+table(predictknn,testing$classe)
+M3<-confusionMatrix(predictknn, testing$classe)
+print(M3)
+```
+
+Compare the Models
+
+When comparing the predictions with the class, it is clear that the random forest method best predicts the class with an accurace of 100% and a 95% confidence interval of 0.999 to 1.  Such results indicate the possibility of overfitting and caution should be employed.  See the model 1 prediction table.
+```{r}
+print(M1)
+```
+Model 3, knn, predicts the class with an accuracy of 92.1% and a 95% confidence interval of 0.911 to 0.923.  This model could be used as a prediction model for this dataset, but fails to predict as well as the random forest method.  For example, Class A was misclassified 39 times. See the model 3 table.  
+```{r}
+print(M3)
+```
+
+Model 2, rpart, demonstrated the least accuract in predicting class with an accurace of 50.1% with a 95% confidence interval of 0.454 to 0.517.  The partitioning placed most of the actions in classes A, B and C and only one in class E and none in class D.  See the model 2 table.
+```{r}
+print(M3)
+```
+
+Given these results, the random forest method was applied to the graded test set for this project.
+
+```{r}
+forgrade<-predict(model1,grade)
+pml_write_files = function(x){
+    n = length(x) 
+    for(i in 1:n){
+        filename = paste0("problem_id_",i,".txt")
+        write.table(x[i],file=filename,quote=FALSE,row.names=FALSE,col.names=FALSE)
+    }
+}
+
+pml_write_files(forgrade)
+```
+
